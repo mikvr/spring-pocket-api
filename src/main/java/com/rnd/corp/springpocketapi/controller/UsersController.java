@@ -1,6 +1,7 @@
 package com.rnd.corp.springpocketapi.controller;
 
 import com.rnd.corp.springpocketapi.service.UsersService;
+import com.rnd.corp.springpocketapi.service.dto.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.service.dto.UsersUpdateDTO;
 import com.rnd.corp.springpocketapi.service.dto.UsersDTO;
 import com.rnd.corp.springpocketapi.service.dto.UsersExposedDTO;
@@ -40,5 +41,10 @@ public class UsersController {
     @DeleteMapping("/{login}")
     public ResponseEntity<Void> deleteUser(@PathVariable("login") String login) {
         return this.usersService.deleteUsers(login);
+    }
+
+    @PutMapping("/{login}/pwd")
+    public ResponseEntity<Void> updateUserPassword(@RequestBody UsersPwdDTO usersPwdDTO, @PathVariable("login") String login) {
+        return this.usersService.updatePwd(login, usersPwdDTO);
     }
 }

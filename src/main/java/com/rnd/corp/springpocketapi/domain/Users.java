@@ -31,4 +31,8 @@ public class Users {
         this.mail = mail;
         this.img = img;
     }
+
+    public void updatePwd(String pwd) {
+        this.password = pwd;
+    }
 }
