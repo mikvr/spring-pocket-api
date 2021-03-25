@@ -25,4 +25,10 @@ public class Users {
     private String password;
     private String mail;
     private String img;
+
+    public void update(String name, String mail, String img) {
+        this.name = name;
+        this.mail = mail;
+        this.img = img;
+    }
 }
