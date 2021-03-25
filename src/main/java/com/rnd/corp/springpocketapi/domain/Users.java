@@ -1,5 +1,6 @@
 package com.rnd.corp.springpocketapi.domain;
 
+import javax.naming.AuthenticationException;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -25,6 +26,7 @@ public class Users {
     private String password;
     private String mail;
     private String img;
+    private boolean connected;
 
     public void update(String name, String mail, String img) {
         this.name = name;
@@ -34,5 +36,12 @@ public class Users {
 
     public void updatePwd(String pwd) {
         this.password = pwd;
+    }
+
+    public void authenticate(String pwd) throws AuthenticationException {
+        if (!this.password.equals(pwd)) {
+            throw new AuthenticationException("Wrong Password");
+        }
+        this.connected = Boolean.TRUE;
     }
 }
