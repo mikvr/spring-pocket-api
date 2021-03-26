@@ -14,12 +14,22 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> resourceNotFoundHandler(ResourceNotFoundException e) {
+    public ResponseEntity<Object> resourceNotFoundExceptionHandler(ResourceNotFoundException e) {
         return responseException(e);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Object> conflictExceptionHandler(ConflictException e) {
+        return responseException(e);
+    }
+
+    @ExceptionHandler(BadRequestHandler.class)
+    public ResponseEntity<Object> badRequestExceptionHandler(BadRequestHandler e) {
+        return responseException(e);
+    }
+
+    @ExceptionHandler(UnauthorizedExceptionHandler.class)
+    public ResponseEntity<Object> unauthorizedExceptionHandler(UnauthorizedExceptionHandler e) {
         return responseException(e);
     }
 

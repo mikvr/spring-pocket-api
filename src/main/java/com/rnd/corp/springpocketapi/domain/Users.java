@@ -1,9 +1,16 @@
 package com.rnd.corp.springpocketapi.domain;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.naming.AuthenticationException;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +24,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "login"),
+    @UniqueConstraint(columnNames = "mail")
+})
 public class Users {
 
     @Id
@@ -26,7 +36,13 @@ public class Users {
     private String password;
     private String mail;
     private String img;
-    private boolean connected;
+    private boolean connected = Boolean.FALSE;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(	name = "users_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     public void update(String name, String mail, String img) {
         this.name = name;
@@ -38,14 +54,4 @@ public class Users {
         this.password = pwd;
     }
 
-    public void authenticate(String pwd) throws AuthenticationException {
-        if (!this.password.equals(pwd)) {
-            throw new AuthenticationException("Wrong Password");
-        }
-        this.connected = Boolean.TRUE;
-    }
-
-    public void disconnect() {
-        this.connected = Boolean.FALSE;
-    }
 }
