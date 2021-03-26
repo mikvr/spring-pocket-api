@@ -44,4 +44,8 @@ public class Users {
         }
         this.connected = Boolean.TRUE;
     }
+
+    public void disconnect() {
+        this.connected = Boolean.FALSE;
+    }
 }

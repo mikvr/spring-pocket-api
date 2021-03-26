@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.rnd.corp.springpocketapi.domain.Users;
+import com.rnd.corp.springpocketapi.exception.OperationException;
+import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
 import com.rnd.corp.springpocketapi.service.dto.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.utils.JwtHelper;
@@ -29,7 +31,7 @@ public class OperationService {
             try {
                 users.authenticate(usersPwdDTO.getPassword());
             } catch (AuthenticationException e) {
-                e.printStackTrace();
+                throw new OperationException(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
 
             try {
@@ -37,10 +39,19 @@ public class OperationService {
                 response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } catch (JWTCreationException exc) {
-                throw new JWTCreationException("Token generation failed !", exc);
+                throw new OperationException(exc.getMessage(), HttpStatus.UNAUTHORIZED);
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    public ResponseEntity<Void> logout(final String login) {
+        final Users users = this.usersRepository.getUsersByLogin(login);
+        if (users != null) {
+            users.disconnect();
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+        throw new ResourceNotFoundException();
     }
 
 }
