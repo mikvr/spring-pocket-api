@@ -1,6 +1,8 @@
 package com.rnd.corp.springpocketapi.service;
 
 import com.rnd.corp.springpocketapi.domain.Users;
+import com.rnd.corp.springpocketapi.exception.ConflictException;
+import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
 import com.rnd.corp.springpocketapi.service.dto.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.service.dto.UsersUpdateDTO;
@@ -24,7 +26,7 @@ public class UsersService {
             final Users users = this.usersRepository.getUsersByLogin(login);
             return ResponseEntity.ok(this.usersMapper.toExposedDTO(users));
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        throw new ResourceNotFoundException();
     }
 
     public ResponseEntity<UsersExposedDTO> saveUsers(final UsersDTO usersDTO) {
@@ -32,7 +34,7 @@ public class UsersService {
             Users users = this.usersRepository.save(this.usersMapper.toEntity(usersDTO));
             return ResponseEntity.ok(this.usersMapper.toExposedDTO(users));
         }
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        throw new ConflictException(usersDTO.getLogin());
     }
 
     public ResponseEntity<Void> updateUsers(final String login, final UsersUpdateDTO usersUpdateDTO) {
@@ -42,7 +44,7 @@ public class UsersService {
             this.usersRepository.save(users);
             return ResponseEntity.status(HttpStatus.OK).build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        throw new ResourceNotFoundException();
     }
 
     public ResponseEntity<Void> deleteUsers(final String login) {
@@ -51,7 +53,7 @@ public class UsersService {
             this.usersRepository.delete(users);
             return ResponseEntity.status(HttpStatus.OK).build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        throw new ResourceNotFoundException();
     }
 
     public ResponseEntity<Void> updatePwd(final String login, final UsersPwdDTO usersPwdDTO) {
@@ -61,7 +63,7 @@ public class UsersService {
             this.usersRepository.save(users);
             return ResponseEntity.status(HttpStatus.OK).build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        throw new ResourceNotFoundException();
     }
 
     /**
