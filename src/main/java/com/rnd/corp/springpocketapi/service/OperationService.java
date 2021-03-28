@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.rnd.corp.springpocketapi.domain.finance.Finance;
 import com.rnd.corp.springpocketapi.domain.users.ERole;
 import com.rnd.corp.springpocketapi.domain.users.Role;
 import com.rnd.corp.springpocketapi.domain.users.Users;
@@ -12,6 +13,7 @@ import com.rnd.corp.springpocketapi.exception.BadRequestHandler;
 import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.repository.RoleRepository;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
+import com.rnd.corp.springpocketapi.repository.finance.FinanceRepository;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersLoginDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersPwdDTO;
@@ -36,6 +38,7 @@ public class OperationService {
 
     private final UsersRepository usersRepository;
     private final RoleRepository roleRepository;
+    private final FinanceRepository financeRepository;
 
     private final AuthenticationManager authenticationManager;
     private final UsersMapper usersMapper;
@@ -82,7 +85,9 @@ public class OperationService {
     }
 
     /**
-     * Add new User
+     * Add new User.
+     * Also initialize user's finance.
+     *
      * @param usersDTO user to add
      * @return Response status
      */
@@ -90,43 +95,28 @@ public class OperationService {
         if (this.usersRepository.existsByLogin(usersDTO.getLogin())) {
             throw new BadRequestHandler("Error: Username is already taken!");
         }
-
         if (this.usersRepository.existsByMail(usersDTO.getMail())) {
             throw new BadRequestHandler("Error: e-mail is already in use!");
         }
 
+        // Setting encoded password
         final Users user = this.usersMapper.toEntity(usersDTO);
         user.setPassword(encoder.encode(usersDTO.getPassword()));
-        final Set<ERole> strRoles = usersDTO.getRoles();
-        Set<Role> roles = new HashSet<>();
 
-        if (strRoles.isEmpty()) {
-            Role userRole = this.roleRepository
-                .findByRole(ERole.ROLE_USER)
-                .orElseThrow(ResourceNotFoundException::new);
-            roles.add(userRole);
-        } else {
-            // Use a switch for later : may add multiple roles
-            strRoles.forEach(role -> {
-                switch (role) {
-                case ROLE_ADMIN:
-                    Role adminRole = this.roleRepository
-                        .findByRole(ERole.ROLE_ADMIN)
-                        .orElseThrow(ResourceNotFoundException::new);
-                    roles.add(adminRole);
-                    break;
-                default:
-                    Role userRole = this.roleRepository
-                        .findByRole(ERole.ROLE_USER)
-                        .orElseThrow(ResourceNotFoundException::new);
-                    roles.add(userRole);
-                    break;
-                }
-            });
-        }
-        user.setRoles(roles);
+        // Setting user's roles
+        final Set<ERole> userRoles = usersDTO.getRoles();
+        user.setRoles(this.setUsersRoles(userRoles));
+
+        // Setting user status
         user.setConnected(Boolean.TRUE);
+
+        // Initialize user's finance
+        final Finance finance = new Finance();
+        finance.setUserId(user.getLogin());
+
         this.usersRepository.save(user);
+        this.financeRepository.save(finance);
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -153,6 +143,36 @@ public class OperationService {
             }
         }
         throw new ResourceNotFoundException();
+    }
+
+    private Set<Role> setUsersRoles(Set<ERole> userRoles) {
+        Set<Role> roles = new HashSet<>();
+
+        if (userRoles.isEmpty()) {
+            Role userRole = this.roleRepository
+                .findByRole(ERole.ROLE_USER)
+                .orElseThrow(ResourceNotFoundException::new);
+            roles.add(userRole);
+        } else {
+            // Use a switch for later : may add multiple roles
+            userRoles.forEach(role -> {
+                switch (role) {
+                case ROLE_ADMIN:
+                    Role adminRole = this.roleRepository
+                        .findByRole(ERole.ROLE_ADMIN)
+                        .orElseThrow(ResourceNotFoundException::new);
+                    roles.add(adminRole);
+                    break;
+                default:
+                    Role userRole = this.roleRepository
+                        .findByRole(ERole.ROLE_USER)
+                        .orElseThrow(ResourceNotFoundException::new);
+                    roles.add(userRole);
+                    break;
+                }
+            });
+        }
+        return roles;
     }
 
 }
