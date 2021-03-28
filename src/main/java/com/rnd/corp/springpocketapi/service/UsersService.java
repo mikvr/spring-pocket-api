@@ -2,13 +2,13 @@ package com.rnd.corp.springpocketapi.service;
 
 import javax.transaction.Transactional;
 
-import com.rnd.corp.springpocketapi.domain.Users;
+import com.rnd.corp.springpocketapi.domain.users.Users;
 import com.rnd.corp.springpocketapi.exception.BadRequestHandler;
 import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.exception.UnauthorizedExceptionHandler;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
-import com.rnd.corp.springpocketapi.service.dto.UsersExposedDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersUpdateDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersExposedDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersUpdateDTO;
 import com.rnd.corp.springpocketapi.service.mapper.UsersMapper;
 import com.rnd.corp.springpocketapi.service.security.UserDetailsImpl;
 import com.rnd.corp.springpocketapi.utils.UsersServiceHelper;

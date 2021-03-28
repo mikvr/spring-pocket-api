@@ -4,9 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.rnd.corp.springpocketapi.service.OperationService;
-import com.rnd.corp.springpocketapi.service.dto.UsersDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersLoginDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersPwdDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersLoginDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersPwdDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

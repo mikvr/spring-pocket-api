@@ -1,6 +1,6 @@
 package com.rnd.corp.springpocketapi.utils;
 
-import com.rnd.corp.springpocketapi.domain.ERole;
+import com.rnd.corp.springpocketapi.domain.users.ERole;
 import com.rnd.corp.springpocketapi.service.security.UserDetailsImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 
