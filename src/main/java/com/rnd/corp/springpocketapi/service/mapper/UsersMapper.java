@@ -1,8 +1,8 @@
 package com.rnd.corp.springpocketapi.service.mapper;
 
-import com.rnd.corp.springpocketapi.domain.Users;
-import com.rnd.corp.springpocketapi.service.dto.UsersDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersExposedDTO;
+import com.rnd.corp.springpocketapi.domain.users.Users;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersExposedDTO;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

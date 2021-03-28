@@ -1,4 +1,4 @@
-package com.rnd.corp.springpocketapi.service.dto;
+package com.rnd.corp.springpocketapi.service.dto.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsersPwdDTO {
+public class UsersExposedDTO {
 
     private String login;
-    private String old;
-    private String pwd;
+    private String name;
+    private String mail;
 }

@@ -1,8 +1,8 @@
 package com.rnd.corp.springpocketapi.controller;
 
 import com.rnd.corp.springpocketapi.service.UsersService;
-import com.rnd.corp.springpocketapi.service.dto.UsersExposedDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersUpdateDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersExposedDTO;
+import com.rnd.corp.springpocketapi.service.dto.users.UsersUpdateDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

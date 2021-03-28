@@ -1,8 +1,7 @@
-package com.rnd.corp.springpocketapi.domain;
+package com.rnd.corp.springpocketapi.domain.users;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.naming.AuthenticationException;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;

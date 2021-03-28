@@ -1,4 +1,4 @@
-package com.rnd.corp.springpocketapi.domain;
+package com.rnd.corp.springpocketapi.domain.users;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
