@@ -2,7 +2,6 @@ package com.rnd.corp.springpocketapi.controller;
 
 import com.rnd.corp.springpocketapi.service.UsersService;
 import com.rnd.corp.springpocketapi.service.dto.UsersExposedDTO;
-import com.rnd.corp.springpocketapi.service.dto.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.service.dto.UsersUpdateDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +28,9 @@ public class UsersController {
     }
 
     @PutMapping("/{login}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> updateUser(@RequestBody UsersUpdateDTO usersUpdateDTO, @PathVariable("login") String login) {
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Void> updateUser(@RequestBody UsersUpdateDTO usersUpdateDTO,
+        @PathVariable("login") String login) {
         return this.usersService.updateUsers(login, usersUpdateDTO);
     }
 
@@ -40,9 +40,4 @@ public class UsersController {
         return this.usersService.deleteUsers(login);
     }
 
-    @PutMapping("/{login}/pwd")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> updateUserPassword(@RequestBody UsersPwdDTO usersPwdDTO, @PathVariable("login") String login) {
-        return this.usersService.updatePwd(login, usersPwdDTO);
-    }
 }

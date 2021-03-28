@@ -50,8 +50,4 @@ public class Users {
         this.img = img;
     }
 
-    public void updatePwd(String pwd) {
-        this.password = pwd;
-    }
-
 }
