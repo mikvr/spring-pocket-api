@@ -1,8 +1,5 @@
 package com.rnd.corp.springpocketapi.service.dto;
 
-import java.util.Set;
-
-import com.rnd.corp.springpocketapi.domain.ERole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsersDTO {
+public class UsersLoginDTO {
 
     private String login;
-    private String name;
     private String password;
-    private String mail;
-    private String img;
-    private Set<ERole> roles;
-
 }

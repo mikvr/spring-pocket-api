@@ -64,7 +64,10 @@ public class JwtHelper {
     }
 
     public static boolean isAuth(String token, String origin) {
-        String realToken = token.split(" ")[1];
-        return verifyToken(realToken, origin) != null;
+        return verifyToken(token, origin) != null;
+    }
+
+    public static String getUserNameFromJwtToken(String token) {
+        return JWT.decode(token).getSubject();
     }
 }

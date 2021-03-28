@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class UsersPwdDTO {
 
     private String login;
-    private String password;
+    private String old;
+    private String pwd;
 }
