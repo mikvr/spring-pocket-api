@@ -4,18 +4,22 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
 import com.rnd.corp.springpocketapi.domain.finance.Finance;
 import com.rnd.corp.springpocketapi.domain.finance.MonthlyTransaction;
+import com.rnd.corp.springpocketapi.domain.finance.Transaction;
 import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.exception.UnauthorizedExceptionHandler;
 import com.rnd.corp.springpocketapi.repository.finance.FinanceRepository;
 import com.rnd.corp.springpocketapi.repository.finance.MonthlyTransactionRepository;
 import com.rnd.corp.springpocketapi.service.dto.finance.FinanceExposedDTO;
 import com.rnd.corp.springpocketapi.service.dto.finance.MonthlyTransactionExposedDTO;
+import com.rnd.corp.springpocketapi.service.dto.finance.TransactionExposedDTO;
 import com.rnd.corp.springpocketapi.service.mapper.FinanceMapper;
+import com.rnd.corp.springpocketapi.service.mapper.TransactionRepository;
 import com.rnd.corp.springpocketapi.utils.UsersServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,8 @@ import org.springframework.stereotype.Service;
 public class FinanceGetterService {
     private final FinanceRepository financeRepository;
     private final MonthlyTransactionRepository monthlyTransactionRepository;
+    private final TransactionRepository transactionRepository;
+
     private final FinanceMapper mapper;
 
     /**
@@ -74,4 +80,24 @@ public class FinanceGetterService {
         }
         throw new UnauthorizedExceptionHandler();
     }
+
+    /**
+     * Search a transaction by id
+     *
+     * @param login user's login
+     * @param id    transaction id
+     * @return transaction
+     */
+    public ResponseEntity<TransactionExposedDTO> getTransactionById(final String login, final int id) {
+        if (UsersServiceHelper.checkUserOrigin(login)) {
+            Optional<Transaction> transaction = this.transactionRepository.findById(id);
+            if (transaction.isPresent()) {
+                return ResponseEntity.ok(this.mapper.toExposedTransactionDTO(transaction.get()));
+            }
+            throw new ResourceNotFoundException();
+        }
+        throw new UnauthorizedExceptionHandler();
+    }
+
+    // public ResponseEntity<List<Transaction>> getAllTransactionByMonth(final String login, final String monthId, )
 }
