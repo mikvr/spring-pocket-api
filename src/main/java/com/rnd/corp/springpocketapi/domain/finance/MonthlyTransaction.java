@@ -1,11 +1,11 @@
 package com.rnd.corp.springpocketapi.domain.finance;
 
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,15 +18,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "finance")
-public class Finance {
+@Table(name = "monthly_transaction")
+public class MonthlyTransaction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @EmbeddedId
+    private MonthlyTransactionId id;
+
     private float balance;
     private float income;
     private float outcome;
-    private String userId;
+
+    @Column(name = "finance_id", insertable = false, updatable = false)
+    private int financeId;
 
 }

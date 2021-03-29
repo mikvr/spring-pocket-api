@@ -1,11 +1,17 @@
 package com.rnd.corp.springpocketapi.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
 import com.rnd.corp.springpocketapi.domain.finance.Finance;
+import com.rnd.corp.springpocketapi.domain.finance.MonthlyTransaction;
 import com.rnd.corp.springpocketapi.domain.users.ERole;
 import com.rnd.corp.springpocketapi.domain.users.Role;
 import com.rnd.corp.springpocketapi.domain.users.Users;
@@ -14,6 +20,7 @@ import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.repository.RoleRepository;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
 import com.rnd.corp.springpocketapi.repository.finance.FinanceRepository;
+import com.rnd.corp.springpocketapi.repository.finance.MonthlyTransactionRepository;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersLoginDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersPwdDTO;
@@ -39,6 +46,7 @@ public class OperationService {
     private final UsersRepository usersRepository;
     private final RoleRepository roleRepository;
     private final FinanceRepository financeRepository;
+    private final MonthlyTransactionRepository monthlyTransactionRepository;
 
     private final AuthenticationManager authenticationManager;
     private final UsersMapper usersMapper;
@@ -99,23 +107,14 @@ public class OperationService {
             throw new BadRequestHandler("Error: e-mail is already in use!");
         }
 
-        // Setting encoded password
+        // Setting user's credentials
         final Users user = this.usersMapper.toEntity(usersDTO);
         user.setPassword(encoder.encode(usersDTO.getPassword()));
-
-        // Setting user's roles
         final Set<ERole> userRoles = usersDTO.getRoles();
         user.setRoles(this.setUsersRoles(userRoles));
-
-        // Setting user status
         user.setConnected(Boolean.TRUE);
 
-        // Initialize user's finance
-        final Finance finance = new Finance();
-        finance.setUserId(user.getLogin());
-
-        this.usersRepository.save(user);
-        this.financeRepository.save(finance);
+        this.setUserFinance(user);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -147,7 +146,6 @@ public class OperationService {
 
     private Set<Role> setUsersRoles(Set<ERole> userRoles) {
         Set<Role> roles = new HashSet<>();
-
         if (userRoles.isEmpty()) {
             Role userRole = this.roleRepository
                 .findByRole(ERole.ROLE_USER)
@@ -173,6 +171,28 @@ public class OperationService {
             });
         }
         return roles;
+    }
+
+    /**
+     * Initialize user's finance credentials and save user
+     *
+     * @param user user to create
+     */
+    private void setUserFinance(final Users user) {
+        final Finance finance = new Finance();
+        final MonthlyTransaction mTransaction = new MonthlyTransaction();
+        finance.setUserId(user.getLogin());
+
+        this.usersRepository.save(user);
+        final Finance savedFinance = this.financeRepository.save(finance);
+
+        // Monthly transaction's date is always set on the second day of the month
+        final Instant date = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+                                          .withDayOfMonth(2)
+                                          .toInstant(ZoneOffset.UTC);
+
+        mTransaction.setId(new MonthlyTransactionId(date, savedFinance.getId()));
+        this.monthlyTransactionRepository.save(mTransaction);
     }
 
 }

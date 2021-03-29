@@ -1,4 +1,4 @@
-package com.rnd.corp.springpocketapi.domain.finance;
+package com.rnd.corp.springpocketapi.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,15 +18,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "finance")
-public class Finance {
+@Table(name = "label")
+public class Label {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private float balance;
-    private float income;
-    private float outcome;
-    private String userId;
-
+    private String name;
 }
