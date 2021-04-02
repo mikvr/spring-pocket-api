@@ -25,6 +25,7 @@ import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersLoginDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.service.mapper.UsersMapper;
+import com.rnd.corp.springpocketapi.utils.FinanceServiceHelper;
 import com.rnd.corp.springpocketapi.utils.JwtHelper;
 import com.rnd.corp.springpocketapi.utils.UsersServiceHelper;
 import lombok.RequiredArgsConstructor;
@@ -186,11 +187,7 @@ public class OperationService {
         this.usersRepository.save(user);
         final Finance savedFinance = this.financeRepository.save(finance);
 
-        // Monthly transaction's date is always set on the second day of the month
-        final Instant date = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-                                          .withDayOfMonth(2)
-                                          .toInstant(ZoneOffset.UTC);
-
+        final Instant date = FinanceServiceHelper.setInitialMonthDate();
         mTransaction.setId(new MonthlyTransactionId(date, savedFinance.getId()));
         this.monthlyTransactionRepository.save(mTransaction);
     }

@@ -31,4 +31,15 @@ public class MonthlyTransaction {
     @Column(name = "finance_id", insertable = false, updatable = false)
     private int financeId;
 
+    public MonthlyTransaction(MonthlyTransactionId id, float amount) {
+        this.id = id;
+        this.balance = amount;
+        if (balance >= 0) {
+            this.income = balance;
+            this.outcome = 0.00f;
+        } else {
+            this.income = 0.00f;
+            this.outcome = -amount;
+        }
+    }
 }

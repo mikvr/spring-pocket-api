@@ -1,11 +1,10 @@
 package com.rnd.corp.springpocketapi.service.finance;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
 import com.rnd.corp.springpocketapi.domain.finance.Finance;
@@ -19,7 +18,8 @@ import com.rnd.corp.springpocketapi.service.dto.finance.FinanceExposedDTO;
 import com.rnd.corp.springpocketapi.service.dto.finance.MonthlyTransactionExposedDTO;
 import com.rnd.corp.springpocketapi.service.dto.finance.TransactionExposedDTO;
 import com.rnd.corp.springpocketapi.service.mapper.FinanceMapper;
-import com.rnd.corp.springpocketapi.service.mapper.TransactionRepository;
+import com.rnd.corp.springpocketapi.repository.finance.TransactionRepository;
+import com.rnd.corp.springpocketapi.utils.FinanceServiceHelper;
 import com.rnd.corp.springpocketapi.utils.UsersServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,12 +64,7 @@ public class FinanceGetterService {
 
         if (UsersServiceHelper.checkUserOrigin(login)) {
 
-            final Instant associatedDate = Instant.ofEpochMilli(date.getTime())
-                                                  .atZone(ZoneId.systemDefault())
-                                                  .toLocalDateTime()
-                                                  .withDayOfMonth(2)
-                                                  .toInstant(ZoneOffset.UTC);
-
+            final Instant associatedDate = FinanceServiceHelper.getAssociatedMonthDate(date);
             final Optional<MonthlyTransaction> transaction =
                 this.monthlyTransactionRepository.findById(new MonthlyTransactionId(associatedDate, financeId));
 
@@ -99,5 +94,22 @@ public class FinanceGetterService {
         throw new UnauthorizedExceptionHandler();
     }
 
-    // public ResponseEntity<List<Transaction>> getAllTransactionByMonth(final String login, final String monthId, )
+    public ResponseEntity<List<TransactionExposedDTO>> getAllTransactionByMonth(final String login,
+        final Date monthDate, final int financeId) {
+
+        if (UsersServiceHelper.checkUserOrigin(login)) {
+            final MonthlyTransactionId id = new MonthlyTransactionId(monthDate.toInstant(), financeId);
+            Optional<MonthlyTransaction> mTransaction = this.monthlyTransactionRepository.findById(id);
+            if (mTransaction.isPresent()) {
+                List<Transaction> transactions = this.transactionRepository.findAllByMtId(mTransaction.get());
+                final List<TransactionExposedDTO> transactionDTO =
+                    transactions.stream()
+                                .map(this.mapper::toExposedTransactionDTO)
+                                .collect(Collectors.toList());
+                return ResponseEntity.ok(transactionDTO);
+            }
+            throw new ResourceNotFoundException();
+        }
+        throw new UnauthorizedExceptionHandler();
+    }
 }
