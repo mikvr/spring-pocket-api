@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -34,31 +33,33 @@ public class FinanceController {
         return this.financeGetterService.getFinance(login);
     }
 
-    @GetMapping("/{login}/finance/month")
+    @GetMapping("/{login}/finance/{financeId}/month/{date}")
     public ResponseEntity<MonthlyTransactionExposedDTO> getMonthFinanceById(
         @PathVariable("login") String login,
-        @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") Date date,
-        @RequestParam("financeId") int financeId) {
+        @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM") Date date,
+        @PathVariable("financeId") int financeId) {
         return this.financeGetterService.getMonthlyTransaction(login, date, financeId);
     }
 
-    @GetMapping("/{login}/finance/transaction")
+    @GetMapping("/{login}/finance/transaction/{transactionId}")
     public ResponseEntity<TransactionExposedDTO> getTransactionById(@PathVariable("login") String login,
-        @RequestParam("financeId") int id) {
+        @PathVariable("transactionId") int id) {
         return this.financeGetterService.getTransactionById(login, id);
     }
 
-    @GetMapping("/{login}/finance/transaction/all/month")
+    @GetMapping("/{login}/finance/{financeId}/transaction/month/{monthId}")
     public ResponseEntity<List<TransactionExposedDTO>> getAllTransactionByMonth(
         @PathVariable("login") String login,
-        @RequestParam("monthId") Date monthDate,
-        @RequestParam("financeId") int financeId) {
+        @PathVariable("monthId") @DateTimeFormat(pattern = "yyyy-MM") Date monthDate,
+        @PathVariable("financeId") int financeId) {
         return this.financeGetterService.getAllTransactionByMonth(login, monthDate, financeId);
     }
 
     @PostMapping("/{login}/finance/{financeId}/transaction")
-    public ResponseEntity<TransactionExposedDTO> addTransaction(@PathVariable("login") String login,
-        @PathVariable("financeId") int financeId, @RequestBody TransactionFormDTO transaction) {
+    public ResponseEntity<TransactionExposedDTO> addTransaction(
+        @PathVariable("login") String login,
+        @PathVariable("financeId") int financeId,
+        @RequestBody TransactionFormDTO transaction) {
         return this.financeSetterService.addTransaction(login, transaction, financeId);
     }
 }

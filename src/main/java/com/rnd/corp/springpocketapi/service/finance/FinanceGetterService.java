@@ -98,7 +98,8 @@ public class FinanceGetterService {
         final Date monthDate, final int financeId) {
 
         if (UsersServiceHelper.checkUserOrigin(login)) {
-            final MonthlyTransactionId id = new MonthlyTransactionId(monthDate.toInstant(), financeId);
+            final Instant associatedDate = FinanceServiceHelper.getAssociatedMonthDate(monthDate);
+            final MonthlyTransactionId id = new MonthlyTransactionId(associatedDate, financeId);
             Optional<MonthlyTransaction> mTransaction = this.monthlyTransactionRepository.findById(id);
             if (mTransaction.isPresent()) {
                 List<Transaction> transactions = this.transactionRepository.findAllByMtId(mTransaction.get());

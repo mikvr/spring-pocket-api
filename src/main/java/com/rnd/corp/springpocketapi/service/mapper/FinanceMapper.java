@@ -24,6 +24,7 @@ public interface FinanceMapper {
     TransactionExposedDTO toExposedTransactionDTO(Transaction transaction);
 
     @Mapping(target = "date", expression = "java(dto.getDate().toInstant())")
+    @Mapping(target = "label", source = "dto.label")
     Transaction toEntity(TransactionFormDTO dto);
 
 }

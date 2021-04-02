@@ -29,4 +29,13 @@ public class Finance {
     private float outcome;
     private String userId;
 
+
+    public void updateState(final float amount) {
+        this.balance += amount;
+        if (amount >= 0) {
+            this.income +=  amount;
+        } else {
+            this.outcome += -amount;
+        }
+    }
 }

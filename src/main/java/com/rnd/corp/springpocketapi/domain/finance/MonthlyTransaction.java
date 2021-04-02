@@ -1,8 +1,11 @@
 package com.rnd.corp.springpocketapi.domain.finance;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
@@ -31,6 +34,10 @@ public class MonthlyTransaction {
     @Column(name = "finance_id", insertable = false, updatable = false)
     private int financeId;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "finance_id", insertable = false, updatable = false)
+    private Finance finance;
+
     public MonthlyTransaction(MonthlyTransactionId id, float amount) {
         this.id = id;
         this.balance = amount;
@@ -41,5 +48,15 @@ public class MonthlyTransaction {
             this.income = 0.00f;
             this.outcome = -amount;
         }
+    }
+
+    public void updateState(final float amount) {
+        this.balance += amount;
+        if (amount >= 0) {
+            this.income +=  amount;
+        } else {
+            this.outcome += -amount;
+        }
+        this.finance.updateState(amount);
     }
 }
