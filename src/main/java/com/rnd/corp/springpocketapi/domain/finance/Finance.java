@@ -1,14 +1,9 @@
 package com.rnd.corp.springpocketapi.domain.finance;
 
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -27,17 +22,20 @@ import lombok.Setter;
 public class Finance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private float balance;
     private float income;
     private float outcome;
     private String userId;
 
-    @OneToMany
-    @JoinTable(name = "finance_archive",
-    joinColumns = @JoinColumn(name = "id_finance"),
-    inverseJoinColumns = @JoinColumn(name = "id_archive"))
-    private Set<Archive> archives = new HashSet<>();
 
+    public void updateState(final float amount) {
+        this.balance += amount;
+        if (amount >= 0) {
+            this.income +=  amount;
+        } else {
+            this.outcome += -amount;
+        }
+    }
 }

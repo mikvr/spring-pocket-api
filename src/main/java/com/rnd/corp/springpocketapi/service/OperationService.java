@@ -1,10 +1,17 @@
 package com.rnd.corp.springpocketapi.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.rnd.corp.springpocketapi.domain.MonthlyTransactionId;
+import com.rnd.corp.springpocketapi.domain.finance.Finance;
+import com.rnd.corp.springpocketapi.domain.finance.MonthlyTransaction;
 import com.rnd.corp.springpocketapi.domain.users.ERole;
 import com.rnd.corp.springpocketapi.domain.users.Role;
 import com.rnd.corp.springpocketapi.domain.users.Users;
@@ -12,10 +19,13 @@ import com.rnd.corp.springpocketapi.exception.BadRequestHandler;
 import com.rnd.corp.springpocketapi.exception.ResourceNotFoundException;
 import com.rnd.corp.springpocketapi.repository.RoleRepository;
 import com.rnd.corp.springpocketapi.repository.UsersRepository;
+import com.rnd.corp.springpocketapi.repository.finance.FinanceRepository;
+import com.rnd.corp.springpocketapi.repository.finance.MonthlyTransactionRepository;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersLoginDTO;
 import com.rnd.corp.springpocketapi.service.dto.users.UsersPwdDTO;
 import com.rnd.corp.springpocketapi.service.mapper.UsersMapper;
+import com.rnd.corp.springpocketapi.utils.FinanceServiceHelper;
 import com.rnd.corp.springpocketapi.utils.JwtHelper;
 import com.rnd.corp.springpocketapi.utils.UsersServiceHelper;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +46,8 @@ public class OperationService {
 
     private final UsersRepository usersRepository;
     private final RoleRepository roleRepository;
+    private final FinanceRepository financeRepository;
+    private final MonthlyTransactionRepository monthlyTransactionRepository;
 
     private final AuthenticationManager authenticationManager;
     private final UsersMapper usersMapper;
@@ -82,7 +94,9 @@ public class OperationService {
     }
 
     /**
-     * Add new User
+     * Add new User.
+     * Also initialize user's finance.
+     *
      * @param usersDTO user to add
      * @return Response status
      */
@@ -90,43 +104,19 @@ public class OperationService {
         if (this.usersRepository.existsByLogin(usersDTO.getLogin())) {
             throw new BadRequestHandler("Error: Username is already taken!");
         }
-
         if (this.usersRepository.existsByMail(usersDTO.getMail())) {
             throw new BadRequestHandler("Error: e-mail is already in use!");
         }
 
+        // Setting user's credentials
         final Users user = this.usersMapper.toEntity(usersDTO);
         user.setPassword(encoder.encode(usersDTO.getPassword()));
-        final Set<ERole> strRoles = usersDTO.getRoles();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles.isEmpty()) {
-            Role userRole = this.roleRepository
-                .findByRole(ERole.ROLE_USER)
-                .orElseThrow(ResourceNotFoundException::new);
-            roles.add(userRole);
-        } else {
-            // Use a switch for later : may add multiple roles
-            strRoles.forEach(role -> {
-                switch (role) {
-                case ROLE_ADMIN:
-                    Role adminRole = this.roleRepository
-                        .findByRole(ERole.ROLE_ADMIN)
-                        .orElseThrow(ResourceNotFoundException::new);
-                    roles.add(adminRole);
-                    break;
-                default:
-                    Role userRole = this.roleRepository
-                        .findByRole(ERole.ROLE_USER)
-                        .orElseThrow(ResourceNotFoundException::new);
-                    roles.add(userRole);
-                    break;
-                }
-            });
-        }
-        user.setRoles(roles);
+        final Set<ERole> userRoles = usersDTO.getRoles();
+        user.setRoles(this.setUsersRoles(userRoles));
         user.setConnected(Boolean.TRUE);
-        this.usersRepository.save(user);
+
+        this.setUserFinance(user);
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -153,6 +143,53 @@ public class OperationService {
             }
         }
         throw new ResourceNotFoundException();
+    }
+
+    private Set<Role> setUsersRoles(Set<ERole> userRoles) {
+        Set<Role> roles = new HashSet<>();
+        if (userRoles.isEmpty()) {
+            Role userRole = this.roleRepository
+                .findByRole(ERole.ROLE_USER)
+                .orElseThrow(ResourceNotFoundException::new);
+            roles.add(userRole);
+        } else {
+            // Use a switch for later : may add multiple roles
+            userRoles.forEach(role -> {
+                switch (role) {
+                case ROLE_ADMIN:
+                    Role adminRole = this.roleRepository
+                        .findByRole(ERole.ROLE_ADMIN)
+                        .orElseThrow(ResourceNotFoundException::new);
+                    roles.add(adminRole);
+                    break;
+                default:
+                    Role userRole = this.roleRepository
+                        .findByRole(ERole.ROLE_USER)
+                        .orElseThrow(ResourceNotFoundException::new);
+                    roles.add(userRole);
+                    break;
+                }
+            });
+        }
+        return roles;
+    }
+
+    /**
+     * Initialize user's finance credentials and save user
+     *
+     * @param user user to create
+     */
+    private void setUserFinance(final Users user) {
+        final Finance finance = new Finance();
+        final MonthlyTransaction mTransaction = new MonthlyTransaction();
+        finance.setUserId(user.getLogin());
+
+        this.usersRepository.save(user);
+        final Finance savedFinance = this.financeRepository.save(finance);
+
+        final Instant date = FinanceServiceHelper.setInitialMonthDate();
+        mTransaction.setId(new MonthlyTransactionId(date, savedFinance.getId()));
+        this.monthlyTransactionRepository.save(mTransaction);
     }
 
 }
